@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<body>
+    <div class="container">
+        <div class="col-sm-12" style="float: none; margin:auto;">
+            <div class="row">
+                <div class="col-sm-3">
+
+                </div>
+                <div class="col-sm-6">
+
+                    <div class="form-group " style="margin-top: 10px;">
+                        <label>Review Title </label>
+                        <input type="text" id="review_title" class="form-control" placeholder="Review Title">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Review Text </label>
+                        <input type="text" id="review_text" class="form-control" placeholder="Review Text">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Age </label>
+                        <input type="text" id="age" class="form-control" placeholder="Age">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Positive Feedback </label>
+                        <input type="text" id="positive_feedback" class="form-control" placeholder="Positive feedback">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Division Name </label>
+                        <input type="text" id="division_name" class="form-control" placeholder="Division name">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Class Name</label>
+                        <input type="text" id="class_name" class="form-control" placeholder="Class Name">
+                    </div>
+
+                    <div class="form-group ">
+                        <label>Department </label>
+                        <input type="text" id="dept" class="form-control" placeholder="Department">
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button onclick="call_model('rating')"  class="btn col  btn-success">Rating Prediction </button>
+                        </div>
+                        <div class="col">
+                            <button onclick="call_model('recommendation')"  class="btn col  btn-success">Recommendation Prediction </button>
+                        </div>
+                        <div class="col">
+                            <button onclick="reset()"  class="btn col  btn-default">Reset </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div id="result_rating"></div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div id="result_recommendation"></div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                </div>
+                
+
+                
+
+            </form>   
+        </div>
+    </div>
+</div>
+
+
+
+    <script>
+
+        function reset(){
+            $('#review_title').val('');
+            $('#review_text').val('');
+            $('#age').val('');
+            $('#positive_feedback').val('');
+            $('#division_name').val('');
+            $('#class_name').val('');
+            $('#dept').val('');
+        }
+        
+
+        function call_model(type){
+            // e.preventDefault();
+
+            var review_title = $('#review_title').val();
+            var review_text = $('#review_text').val();
+            var age = $('#age').val();
+            var positive_feedback = $('#positive_feedback').val();
+            var division_name = $('#division_name').val();
+            var class_name = $('#class_name').val();
+            var dept = $('#dept').val();
+
+            if(type == 'rating'){
+                url_type = 'http://localhost:5000/predict/rating'
+            }else if(type == 'recommendation'){
+                url_type = 'http://localhost:5000/predict/recommendation'
+            }
+
+            var fd = new FormData();
+            fd.append('age',age);
+            fd.append('class_name',class_name);
+            fd.append('division_name',division_name);
+            fd.append('dept',dept);
+            fd.append('positive_feedback',positive_feedback);
+            fd.append('review_title',review_title);
+            fd.append('review_text',review_text);
+
+            $.ajax({
+                url: url_type, 
+                type: 'POST',
+                data: { 
+                'review_title' : review_title,
+                'review_text' : review_text,
+                'age' : age,
+                'positive_feedback' : positive_feedback,
+                'division_name' : division_name,
+                'class_name' : class_name,
+                'dept' : dept,
+                 },
+                success: completeHandler = function (data) {
+                    var result = JSON.parse(data);
+                    var arr = result['probability'][0]
+                    var digit = arr.indexOf(Math.max.apply(window,arr));
+
+                    if(type == 'rating'){
+                        $('#result_rating').html('The predicted rating of the given review is: '+digit);
+                        $('#result_recommendation').html('');
+                    }else if(type == 'recommendation'){
+                        $('#result_rating').html('');
+                        $('#result_recommendation').html('The recommendation of the given product is: '+digit); 
+                    }
+
+                /* Get the proba from the result of api and put it into this id as follows
+                $('#result_proba').html(data.proba) here proba is the variable name from backend */
+            },
+            error: errorHandler = function (error1) {
+                /* Show alert in case of error */
+                console.log(error1);
+                alert("We have received error, please check console log for details");
+
+            },
+                    // Form data
+                    data: fd,
+                    // Options to tell jQuery not to process data or worry about the content-type
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                }, 'json')
+
+            return false;
+        };
+
+
+
+
+
+    </script>
+
+
+</body>
+
+</html>
