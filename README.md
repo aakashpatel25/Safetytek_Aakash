@@ -43,6 +43,7 @@ This repository contains program to train a neural network model on customer rev
     ```
 
 **Note**: To view the model architecture of the trained model open rating_model.png and recommendation_model.
+
 **Note**: To view ui photos please use ui.png and ui1.png
 
 #### Pretrained Model Download and Encoder Download
